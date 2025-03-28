@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "gradevault.client", "gradevault.client\gradevault.client.esproj", "{1EEA7E49-72F5-D945-C553-BB5DD4000BF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeVault.Server", "GradeVault.Server\GradeVault.Server.csproj", "{D7418A9E-5F53-4D22-93FC-1BD560A24697}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1EEA7E49-72F5-D945-C553-BB5DD4000BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EEA7E49-72F5-D945-C553-BB5DD4000BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EEA7E49-72F5-D945-C553-BB5DD4000BF0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{1EEA7E49-72F5-D945-C553-BB5DD4000BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EEA7E49-72F5-D945-C553-BB5DD4000BF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EEA7E49-72F5-D945-C553-BB5DD4000BF0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{D7418A9E-5F53-4D22-93FC-1BD560A24697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7418A9E-5F53-4D22-93FC-1BD560A24697}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7418A9E-5F53-4D22-93FC-1BD560A24697}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7418A9E-5F53-4D22-93FC-1BD560A24697}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {64457984-BC92-491D-8A21-EAB915D0BCC1}
+	EndGlobalSection
+EndGlobal
