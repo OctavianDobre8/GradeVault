@@ -1,0 +1,15 @@
+﻿namespace GradeVault.Server.Models
+{
+    public class Student
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+
+        // Relationships
+        public ICollection<Grade> Grades { get; set; }
+        public ICollection<ClassEnrollment> Enrollments { get; set; }
+    }
+
+}
