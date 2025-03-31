@@ -1,10 +1,13 @@
 using GradeVault.Server.Database;
+using GradeVault.Server.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// EXACT registration syntax:
+builder.Services.AddControllers();
+
 builder.Services.AddDbContext<AppDatabaseContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -17,10 +20,46 @@ builder.Services.AddDbContext<AppDatabaseContext>(options =>
         }
     ));
 
+builder.Services.AddIdentity<User, IdentityRole>(options => {
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8;
+
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<AppDatabaseContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireTeacherRole", policy => policy.RequireRole("Teacher"));
+    options.AddPolicy("RequireStudentRole", policy => policy.RequireRole("Student"));
+});
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApiDocument();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    await DatabaseSeed.seedRoles(roleManager);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -31,11 +70,11 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Fallback to index.html for client-side routing
 app.MapFallbackToFile("/index.html");
 
 app.Run();

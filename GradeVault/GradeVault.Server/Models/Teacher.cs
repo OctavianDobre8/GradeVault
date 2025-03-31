@@ -8,6 +8,8 @@ namespace GradeVault.Server.Models
         public string LastName { get; set; }
         public string Email { get; set; }
 
+        public string UserId { get; set; }
+
         // Relationships
         public ICollection<Class> Classes { get; set; }
     }

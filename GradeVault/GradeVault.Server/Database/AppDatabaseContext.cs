@@ -1,7 +1,8 @@
 ﻿using GradeVault.Server.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-public class AppDatabaseContext : DbContext
+public class AppDatabaseContext : IdentityDbContext<User>
 {
     public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
         : base(options)
@@ -15,7 +16,10 @@ public class AppDatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<ClassEnrollment>()
             .HasKey(ce => new { ce.StudentId, ce.ClassId });
     }
+
 }

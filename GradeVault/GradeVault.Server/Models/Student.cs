@@ -7,6 +7,8 @@
         public string LastName { get; set; }
         public string Email { get; set; }
 
+        public string UserId { get; set; }
+
         // Relationships
         public ICollection<Grade> Grades { get; set; }
         public ICollection<ClassEnrollment> Enrollments { get; set; }
