@@ -11,8 +11,8 @@
         public int ClassId { get; set; }
 
         // Relationships
-        public Student Student { get; set; }
-        public Class Class { get; set; }
+        public Student? Student { get; set; }
+        public Class? Class { get; set; }
     }
 
 }
