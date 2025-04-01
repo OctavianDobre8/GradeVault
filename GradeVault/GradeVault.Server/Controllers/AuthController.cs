@@ -2,13 +2,11 @@
 using GradeVault.Server.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace GradeVault.Server.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : ApiControllerBase
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
@@ -32,6 +30,11 @@ namespace GradeVault.Server.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (string.IsNullOrEmpty(model.Password))
+            {
+                return BadRequest("Password is required.");
+            }
+
             var result = await _signInManager.PasswordSignInAsync(
                 model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
 
@@ -39,6 +42,11 @@ namespace GradeVault.Server.Controllers
             {
                 _logger.LogInformation("User logged in.");
                 var user = await _userManager.FindByEmailAsync(model.Email);
+
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
 
                 return Ok(new
                 {
@@ -67,9 +75,19 @@ namespace GradeVault.Server.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (string.IsNullOrEmpty(model.Password) || string.IsNullOrEmpty(model.ConfirmPassword))
+            {
+                return BadRequest("Password and Confirm Password are required.");
+            }
+
             if (model.Password != model.ConfirmPassword)
             {
                 return BadRequest("Passwords do not match");
+            }
+
+            if (string.IsNullOrEmpty(model.Role))
+            {
+                return BadRequest("Role is required.");
             }
 
             var user = new User
@@ -138,6 +156,5 @@ namespace GradeVault.Server.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
-        
     }
 }

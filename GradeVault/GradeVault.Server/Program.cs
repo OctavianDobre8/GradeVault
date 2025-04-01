@@ -51,6 +51,12 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument();
 
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+    options.SuppressXFrameOptionsHeader = false;
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -69,6 +75,8 @@ app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
