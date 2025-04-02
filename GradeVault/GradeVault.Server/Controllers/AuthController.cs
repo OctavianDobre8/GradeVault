@@ -2,6 +2,8 @@
 using GradeVault.Server.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
+using System.Text.Encodings.Web;
 
 namespace GradeVault.Server.Controllers
 {
@@ -146,6 +148,40 @@ namespace GradeVault.Server.Controllers
 
             return BadRequest(ModelState);
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model) 
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if(user==null) 
+            {
+                return BadRequest("If your email exists in our system, you will receive a password reset link.");
+            }
+
+            //generate password reset token
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            //create reset url with token 
+            var encodedToken = HttpUtility.UrlEncode(token);
+            var encodedEmail = HttpUtility.UrlEncode(user.Email);
+            var callbackUrl = $"{Request.Scheme}://{Request.Host}/reset-password?email={encodedEmail}&token={encodedToken}";
+
+            //log the request 
+            _logger.LogInformation($"Password reset requested for  {model.Email}");
+
+             return Ok(new { 
+            message = "If your email exists in our system, you will receive a password reset link.",
+            resetUrl = callbackUrl // Remove this in production, just for testing
+        });
+
+        }
+
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
