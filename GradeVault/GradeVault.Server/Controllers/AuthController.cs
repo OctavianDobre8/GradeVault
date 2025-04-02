@@ -233,6 +233,49 @@ public async Task<IActionResult> ValidateResetToken([FromQuery] string email, [F
     return Ok(new { isValid = true });
 }
 
+[HttpPost("reset-password")]
+public async Task<IActionResult> ResetPassword(ResetPasswordDTO model)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+
+    var user = await _userManager.FindByEmailAsync(model.Email);
+    
+    if (user == null)
+    {
+        return BadRequest("Failed to reset password");
+    }
+
+    var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+    
+    if (result.Succeeded)
+    {
+        _logger.LogInformation("Password reset successful for user {Email}", model.Email);
+        
+        string emailSubject = "Your Password Has Been Reset";
+        string emailBody = $@"
+            <h2>Password Reset Confirmation</h2>
+            <p>Hello {user.FirstName},</p>
+            <p>Your password for GradeVault has been successfully reset.</p>
+            <p>If you didn't make this change, please contact support immediately.</p>
+        ";
+        
+        try
+        {
+            await _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error sending password reset confirmation email to {model.Email}");
+        }
+        
+        return Ok(new { message = "Password has been reset successfully." });
+    }
+    return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+}
+
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
