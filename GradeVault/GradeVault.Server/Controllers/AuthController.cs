@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Web;
 using System.Text.Encodings.Web;
+using GradeVault.Server.Services;
 
 namespace GradeVault.Server.Controllers
 {
@@ -13,15 +14,17 @@ namespace GradeVault.Server.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<AuthController> _logger;
+        private readonly IEmailService _emailService;
 
         public AuthController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _emailService = emailService;
         }
 
         [HttpPost("login")]
@@ -150,37 +153,54 @@ namespace GradeVault.Server.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model) 
-        {
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+    var user = await _userManager.FindByEmailAsync(model.Email);
+    
+    // Don't reveal that the user does not exist
+    if (user == null)
+    {
+        return Ok(new { message = "If your email exists in our system, you will receive a password reset link." });
+    }
 
-            if(user==null) 
-            {
-                return BadRequest("If your email exists in our system, you will receive a password reset link.");
-            }
+    // Generate password reset token
+    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+    
+    // Encode token for URL
+    var encodedToken = HttpUtility.UrlEncode(token);
+    var encodedEmail = HttpUtility.UrlEncode(model.Email);
+    
+    // Build password reset link
+    var callbackUrl = $"{Request.Scheme}://{Request.Host}/reset-password?email={encodedEmail}&token={encodedToken}";
+    
+    // Prepare email content
+    string emailSubject = "Reset Your Password";
+    string emailBody = $@"
+        <h2>Reset Your GradeVault Password</h2>
+        <p>Hello {user.FirstName},</p>
+        <p>Please reset your password by clicking <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>here</a>.</p>
+        <p>If you didn't request this change, please ignore this email.</p>
+        <p>This link will expire in 24 hours.</p>
+    ";
 
-            //generate password reset token
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            //create reset url with token 
-            var encodedToken = HttpUtility.UrlEncode(token);
-            var encodedEmail = HttpUtility.UrlEncode(user.Email);
-            var callbackUrl = $"{Request.Scheme}://{Request.Host}/reset-password?email={encodedEmail}&token={encodedToken}";
-
-            //log the request 
-            _logger.LogInformation($"Password reset requested for  {model.Email}");
-
-             return Ok(new { 
-            message = "If your email exists in our system, you will receive a password reset link.",
-            resetUrl = callbackUrl // Remove this in production, just for testing
-        });
-
-        }
+    try
+    {
+        // Send email with password reset link
+        await _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
+        
+        return Ok(new { message = "If your email exists in our system, you will receive a password reset link." });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, $"Error sending password reset email to {model.Email}");
+        return StatusCode(500, "Error sending password reset email. Please try again later.");
+    }
+}
 
 
         [HttpPost("logout")]
