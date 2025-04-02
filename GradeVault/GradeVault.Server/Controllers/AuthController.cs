@@ -152,7 +152,7 @@ namespace GradeVault.Server.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPost("forgot-password")]
+[HttpPost("forgot-password")]
 public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
 {
     if (!ModelState.IsValid)
@@ -162,23 +162,23 @@ public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
 
     var user = await _userManager.FindByEmailAsync(model.Email);
     
-    // Don't reveal that the user does not exist
+   
     if (user == null)
     {
         return Ok(new { message = "If your email exists in our system, you will receive a password reset link." });
     }
 
-    // Generate password reset token
+    
     var token = await _userManager.GeneratePasswordResetTokenAsync(user);
     
-    // Encode token for URL
+   
     var encodedToken = HttpUtility.UrlEncode(token);
     var encodedEmail = HttpUtility.UrlEncode(model.Email);
     
-    // Build password reset link
+    
     var callbackUrl = $"{Request.Scheme}://{Request.Host}/reset-password?email={encodedEmail}&token={encodedToken}";
     
-    // Prepare email content
+    
     string emailSubject = "Reset Your Password";
     string emailBody = $@"
         <h2>Reset Your GradeVault Password</h2>
@@ -190,7 +190,7 @@ public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
 
     try
     {
-        // Send email with password reset link
+        
         await _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
         
         return Ok(new { message = "If your email exists in our system, you will receive a password reset link." });
@@ -200,6 +200,37 @@ public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
         _logger.LogError(ex, $"Error sending password reset email to {model.Email}");
         return StatusCode(500, "Error sending password reset email. Please try again later.");
     }
+}
+
+[HttpGet("validate-reset-token")]
+public async Task<IActionResult> ValidateResetToken([FromQuery] string email, [FromQuery] string token)
+{
+    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+    {
+        return BadRequest("Email and token are required");
+    }
+
+    var user = await _userManager.FindByEmailAsync(email);
+    
+    if (user == null)
+    {
+        
+        return BadRequest("Invalid token");
+    }
+
+    
+    var isValid = await _userManager.VerifyUserTokenAsync(
+        user,
+        _userManager.Options.Tokens.PasswordResetTokenProvider,
+        UserManager<User>.ResetPasswordTokenPurpose,
+        token);
+
+    if (!isValid)
+    {
+        return BadRequest("Invalid or expired token");
+    }
+
+    return Ok(new { isValid = true });
 }
 
 
