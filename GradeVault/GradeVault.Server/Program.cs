@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using GradeVault.Server.Services;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDatabaseContext>(options =>
     options.UseMySql(
@@ -21,6 +23,17 @@ builder.Services.AddDbContext<AppDatabaseContext>(options =>
         }
     ));
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/gradevault-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 
 builder.Services.AddIdentity<User, IdentityRole>(options => {
@@ -54,12 +67,12 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument();
 
-builder.Services.AddAntiforgery(options =>
+/*builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-CSRF-TOKEN";
     options.SuppressXFrameOptionsHeader = false;
 });
-
+*/
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 
@@ -83,7 +96,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAntiforgery();
+//app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
