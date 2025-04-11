@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { ResetPasswordComponent } from './features/auth/components/reset-password/reset-password.component';
 
 const routes: Routes = [
   {
@@ -18,6 +19,10 @@ const routes: Routes = [
     loadChildren: () => import('./features/student-dashboard/student-dashboard.module').then(m => m.StudentDashboardModule),
     canActivate: [AuthGuard],
     data: { roles: ['Student'] }
+  },
+  {
+    path: 'reset-password',
+    component: ResetPasswordComponent
   },
   { path: '', redirectTo: 'auth/register', pathMatch: 'full' }  
 ];

@@ -51,6 +51,20 @@ builder.Services.AddIdentity<User, IdentityRole>(options => {
 .AddEntityFrameworkStores<AppDatabaseContext>()
 .AddDefaultTokenProviders();
 
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // When Remember Me is not checked, cookie expires when browser is closed
+    options.SlidingExpiration = true;
+    
+    // When Remember Me is checked, cookie lasts for 30 days
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;

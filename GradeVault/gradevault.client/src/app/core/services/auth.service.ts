@@ -22,12 +22,25 @@ export class AuthService {
   public get currentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
-
+  
   login(loginData: LoginRequest): Observable<User> {
     return this.http.post<User>('/api/auth/login', loginData)
       .pipe(
         tap(user => {
+          // Store the user
           localStorage.setItem('currentUser', JSON.stringify(user));
+          
+          // If rememberMe is false, store the expiration time (e.g., browser session)
+          if (!loginData.rememberMe) {
+            // Session-only storage - will be cleared when browser closes
+            sessionStorage.setItem('userExpiration', 'session');
+          } else {
+            // Store a longer expiration time
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + 30); // 30 days
+            localStorage.setItem('userExpiration', expirationDate.toString());
+          }
+          
           this.currentUserSubject.next(user);
         })
       );
