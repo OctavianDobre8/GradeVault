@@ -16,7 +16,6 @@ import { RegisterComponent } from './components/register/register.component';
     RegisterComponent
   ],
   declarations: [
-    // Empty since components are standalone
   ]
 })
 export class AuthModule { }

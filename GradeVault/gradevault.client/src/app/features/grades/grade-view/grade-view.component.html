@@ -1,0 +1,55 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h2>My Grades</h2>
+    </div>
+    <div class="card-body">
+      <p class="lead">Here are your grades for your enrolled classes.</p>
+
+      <div *ngIf="isLoading" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && grades.length === 0" class="alert alert-info">
+        No grades have been assigned yet.
+      </div>
+
+      <div *ngIf="!isLoading && grades.length > 0" class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Class Name</th>
+              <th scope="col">Grade</th>
+              <th scope="col">Date Assigned</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Sample Row 1 (Replace with *ngFor later) -->
+            <tr>
+              <td>Mathematics 101</td>
+              <td>8</td>
+              <td>2025-04-15</td>
+            </tr>
+            <!-- Sample Row 2 -->
+            <tr>
+              <td>History 202</td>
+              <td>9</td>
+              <td>2025-04-18</td>
+            </tr>
+            <tr>
+              <td>Physics Lab</td>
+              <td>7</td>
+              <td>2025-04-20</td>
+            </tr>
+            <!-- Add more sample rows or loop through actual data later -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer text-muted">
+      Displaying sample grades.
+    </div>
+  </div>
+</div>

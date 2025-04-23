@@ -11,10 +11,9 @@ const routes: Routes = [
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
-    StudentDashboardComponent  // Import instead of declare
+    StudentDashboardComponent
   ],
   declarations: [
-    // Remove StudentDashboardComponent from here
   ]
 })
 export class StudentDashboardModule { }
