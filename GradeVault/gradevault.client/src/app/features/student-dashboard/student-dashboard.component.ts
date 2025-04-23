@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-student-dashboard',
+  standalone: true,
+  imports: [RouterModule],
   templateUrl: './student-dashboard.component.html',
-  styleUrls: ['./student-dashboard.component.css']
+  styleUrls: ['./student-dashboard.component.css'],
 })
 export class StudentDashboardComponent implements OnInit {
   studentName: string = '';
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
     const currentUser = this.authService.currentUserValue;
@@ -24,9 +26,9 @@ export class StudentDashboardComponent implements OnInit {
       next: () => {
         this.router.navigate(['/auth/login']);
       },
-      error: error => {
+      error: (error) => {
         console.error('Logout error', error);
-      }
+      },
     });
   }
 }
