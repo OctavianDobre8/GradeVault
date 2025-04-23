@@ -9,6 +9,7 @@ const PROXY_CONFIG = [
     context: [
       "/api/auth",
       // Add any other API paths you need to proxy
+      "/api/grades",
       "/api",
     ],
     target,

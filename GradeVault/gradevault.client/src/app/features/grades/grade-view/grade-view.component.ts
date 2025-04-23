@@ -11,9 +11,9 @@ import { GradesService } from '../../../core/services/grades.service';
   styleUrl: './grade-view.component.css',
 })
 export class GradeViewComponent implements OnInit {
-  grades: Grade[] = []; 
+  grades: Grade[] = [];
   isLoading: boolean = false;
-  error: string | null = null; 
+  error: string | null = null;
   constructor(private gradesService: GradesService) {}
 
   ngOnInit(): void {
@@ -21,14 +21,14 @@ export class GradeViewComponent implements OnInit {
   }
 
   fetchGrades(): void {
-    this.isLoading = true; 
-    this.error = null; 
+    this.isLoading = true;
+    this.error = null;
 
     this.gradesService.getMyGrades().subscribe({
       next: (data) => {
-        this.grades = data; 
-        this.isLoading = false; 
-        console.log('Grades fetched:', this.grades); 
+        this.grades = data;
+        this.isLoading = false;
+        //console.log('Grades fetched:', this.grades);
       },
       error: (err) => {
         console.error('Error fetching grades:', err);
@@ -38,7 +38,7 @@ export class GradeViewComponent implements OnInit {
         } else if (err.status === 404) {
           this.error = 'No student profile found for your account.';
         }
-        this.isLoading = false; 
+        this.isLoading = false;
         this.grades = [];
       },
     });
