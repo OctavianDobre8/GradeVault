@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Grade } from '../../../shared/models/grade.model';
@@ -7,7 +7,7 @@ import { GradesService } from '../../../core/services/grades.service';
 @Component({
   selector: 'app-class-grades',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DecimalPipe],
   templateUrl: './class-grades.component.html',
   styleUrl: './class-grades.component.css',
 })
@@ -17,6 +17,7 @@ export class ClassGradesComponent implements OnInit {
   grades: Grade[] = [];
   isLoading: boolean = false;
   error: string | null = null;
+  averageGrade: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -39,8 +40,7 @@ export class ClassGradesComponent implements OnInit {
   fetchClassGrades(classId: number): void {
     this.isLoading = true;
     this.error = null;
-
-    console.log(`Fetching grades for class ID: ${classId}`);
+    this.averageGrade = null;
 
     this.gradesService.getGradesByClass(classId).subscribe({
       next: (data) => {
@@ -50,8 +50,7 @@ export class ClassGradesComponent implements OnInit {
         if (data.length > 0 && data[0].className) {
           this.className = data[0].className;
         }
-
-        console.log(`Received ${data.length} grades for class ID: ${classId}`);
+        this.calculateAverage();
       },
       error: (err) => {
         console.error('Error fetching class grades:', err);
@@ -68,5 +67,14 @@ export class ClassGradesComponent implements OnInit {
 
   goBackToClasses(): void {
     this.router.navigate(['/classes']);
+  }
+
+  calculateAverage(): void {
+    if (this.grades && this.grades.length >= 2) {
+      const sum = this.grades.reduce((acc, grade) => acc + grade.value, 0);
+      this.averageGrade = sum / this.grades.length;
+    } else {
+      this.averageGrade = null;
+    }
   }
 }
