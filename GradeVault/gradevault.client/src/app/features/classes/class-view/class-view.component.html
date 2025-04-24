@@ -2,7 +2,6 @@
   <div class="card">
     <div class="card-header">
       <h2>My Classes</h2>
-      <!-- Optional: Add back button -->
     </div>
     <div class="card-body">
       <p class="lead">Here are the classes you are currently enrolled in.</p>
@@ -13,34 +12,38 @@
         </div>
       </div>
 
-      <div *ngIf="!isLoading && classes.length === 0" class="alert alert-info">
+      <div *ngIf="!isLoading && error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <div *ngIf="!isLoading && !error && classes.length === 0" class="alert alert-info">
         You are not currently enrolled in any classes.
       </div>
 
-      <div *ngIf="!isLoading && classes.length > 0">
+      <div *ngIf="!isLoading && !error && classes.length > 0">
         <div class="row row-cols-1 row-cols-md-2 g-4">
           <div class="col" *ngFor="let class of classes">
             <div class="card h-100">
               <div class="card-body">
                 <h5 class="card-title">{{ class.name }}</h5>
                 <p class="card-text mb-1">
-                  <strong>Teacher:</strong> {{ class.teacher }}
+                  <strong>Subject:</strong> {{ class.subject }}
                 </p>
                 <p class="card-text mb-1">
-                  <strong>Room:</strong> {{ class.room }}
+                  <strong>Teacher:</strong> {{ class.teacherName }}
                 </p>
-                <p class="card-text">
-                  <strong>Schedule:</strong> {{ class.schedule }}
-                </p>
-                <!-- Placeholder for future actions -->
-                <!-- <a href="#" class="btn btn-sm btn-outline-secondary">View Details</a> -->
+              </div>
+              <div class="card-footer bg-transparent">
+                <button class="btn btn-primary" (click)="viewClassGrades(class.id)">
+                  View Grades
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="card-footer text-muted">
+    <div class="card-footer text-muted" *ngIf="!isLoading && !error">
       Showing {{ classes.length }} classes.
     </div>
   </div>
