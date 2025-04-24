@@ -1,0 +1,46 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h2>My Grades</h2>
+    </div>
+    <div class="card-body">
+      <p class="lead">Here are your grades for your enrolled classes.</p>
+
+      <div *ngIf="isLoading" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <div *ngIf="!isLoading && !error && grades.length === 0" class="alert alert-info">
+        No grades have been assigned yet.
+      </div>
+
+      <div *ngIf="!isLoading && !error && grades.length > 0" class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Class Name</th>
+              <th scope="col">Grade</th>
+              <th scope="col">Date Assigned</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let grade of grades">
+              <td>{{ grade.className ?? 'N/A' }}</td>
+              <td>{{ grade.value }}</td>
+              <td>{{ grade.dateAssigned | date:'yyyy-MM-dd' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer text-muted" *ngIf="!isLoading && !error">
+      Showing {{ grades.length }} grade entries.
+    </div>
+  </div>
+</div>

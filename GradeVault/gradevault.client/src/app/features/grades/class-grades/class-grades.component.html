@@ -1,0 +1,52 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2>{{ className ? className + ' Grades' : 'Class Grades' }}</h2>
+      <button class="btn btn-outline-secondary" (click)="goBackToClasses()">
+        Back to Classes
+      </button>
+    </div>
+    <div class="card-body">
+      <p class="lead" *ngIf="className">Viewing grades for {{ className }}.</p>
+
+      <div *ngIf="!isLoading && averageGrade !== null" class="alert alert-success mt-3">
+        <strong>Average Grade:</strong> {{ averageGrade | number:'1.1-2' }}
+      </div>
+
+      <div *ngIf="isLoading" class="text-center">
+      </div>
+
+      <div *ngIf="!isLoading && error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <div *ngIf="!isLoading && !error && grades.length === 0" class="alert alert-info">
+        No grades found for this class.
+      </div>
+
+      <div *ngIf="!isLoading && !error && grades.length > 0 && grades.length < 2" class="alert alert-warning mt-3">
+        You need to have at least 2 grades to calculate the average.
+      </div>
+
+      <div *ngIf="!isLoading && !error && grades.length > 0" class="table-responsive mt-3">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Grade</th>
+              <th scope="col">Date Assigned</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let grade of grades">
+              <td>{{ grade.value }}</td>
+              <td>{{ grade.dateAssigned | date:'yyyy-MM-dd' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer text-muted" *ngIf="!isLoading && !error">
+      Showing {{ grades.length }} grades for this class
+    </div>
+  </div>
+</div>

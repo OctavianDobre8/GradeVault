@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
   submitted = false;
   returnUrl: string = '/';
   error = '';
-  registrationSuccess = false;  // Add this property
+  registrationSuccess = false;
 
   constructor(
     private formBuilder: FormBuilder,

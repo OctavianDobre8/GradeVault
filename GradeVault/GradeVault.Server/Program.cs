@@ -90,6 +90,16 @@ builder.Services.AddOpenApiDocument();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder
+            .WithOrigins("https://localhost:59603")
+            .AllowCredentials()
+            .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .WithHeaders("Accept", "Content-Type", "Authorization", "X-Requested-With")
+            .WithExposedHeaders("X-Pagination"));
+});
 
 var app = builder.Build();
 
@@ -111,6 +121,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 //app.UseAntiforgery();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
