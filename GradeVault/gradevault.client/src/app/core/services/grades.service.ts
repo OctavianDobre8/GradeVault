@@ -14,4 +14,8 @@ export class GradesService {
   public getMyGrades(): Observable<Grade[]> {
     return this.http.get<Grade[]>(`${this.apiUrl}/my-grades`);
   }
+
+  public getGradesByClass(classId: number): Observable<Grade[]> {
+    return this.http.get<Grade[]>(`${this.apiUrl}/${classId}/grades`);
+  }
 }
