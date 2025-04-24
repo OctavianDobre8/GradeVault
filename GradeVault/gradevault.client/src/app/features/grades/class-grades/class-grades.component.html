@@ -7,10 +7,13 @@
       </button>
     </div>
     <div class="card-body">
+      <p class="lead" *ngIf="className">Viewing grades for {{ className }}.</p>
+
+      <div *ngIf="!isLoading && averageGrade !== null" class="alert alert-success mt-3">
+        <strong>Average Grade:</strong> {{ averageGrade | number:'1.1-2' }}
+      </div>
+
       <div *ngIf="isLoading" class="text-center">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
       </div>
 
       <div *ngIf="!isLoading && error" class="alert alert-danger">
@@ -21,7 +24,11 @@
         No grades found for this class.
       </div>
 
-      <div *ngIf="!isLoading && !error && grades.length > 0" class="table-responsive">
+      <div *ngIf="!isLoading && !error && grades.length > 0 && grades.length < 2" class="alert alert-warning mt-3">
+        You need to have at least 2 grades to calculate the average.
+      </div>
+
+      <div *ngIf="!isLoading && !error && grades.length > 0" class="table-responsive mt-3">
         <table class="table table-striped table-hover">
           <thead>
             <tr>
@@ -39,7 +46,7 @@
       </div>
     </div>
     <div class="card-footer text-muted" *ngIf="!isLoading && !error">
-      Showing {{ grades.length }} grades for this class.
+      Showing {{ grades.length }} grades for this class
     </div>
   </div>
 </div>
