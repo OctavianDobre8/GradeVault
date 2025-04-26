@@ -6,6 +6,7 @@
         public int Id { get; set; }
         public string Name { get; set; }
         public string Subject { get; set; }
+        public string Description { get; set; }
 
         // Foreign Keys
         public int TeacherId { get; set; }

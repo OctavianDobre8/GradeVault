@@ -1,26 +1,195 @@
 <div class="container mt-4">
-  <div class="card">
+  <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h2>Teacher Dashboard</h2>
       <button class="btn btn-danger" (click)="logout()">Logout</button>
     </div>
     <div class="card-body">
       <h3>Welcome, {{teacherName}}!</h3>
-      <p class="lead">This is your teacher dashboard.</p>
+      <p class="lead">Manage your classes and student grades below.</p>
+    </div>
+  </div>
 
-      <div class="alert alert-info mt-4">
-        <strong>Teacher Dashboard Features</strong>
-        <p>From here, you'll be able to:</p>
-        <ul>
-          <li>Create and manage classes</li>
-          <li>Add and view students in your classes</li>
-          <li>Assign and update grades</li>
-          <li>Generate reports</li>
-        </ul>
+  <!-- Tab navigation -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab === 'classes'" (click)="setActiveTab('classes')">My Classes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab === 'grades'" (click)="setActiveTab('grades')">Grade Entry</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab === 'reports'" (click)="setActiveTab('reports')">Reports</a>
+    </li>
+  </ul>
+
+  <!-- Classes Tab Content -->
+  <div *ngIf="activeTab === 'classes'" class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4>My Classes</h4>
+      <button class="btn btn-primary" (click)="openCreateClassModal()">Create New Class</button>
+    </div>
+    <div class="card-body">
+      <div *ngIf="classes.length === 0" class="alert alert-info">
+        You don't have any classes yet. Click "Create New Class" to get started.
       </div>
+      <div *ngIf="classes.length > 0" class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Class Name</th>
+              <th>Subject</th>
+              <th>Students</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let class of classes">
+              <td>{{class.name}}</td>
+              <td>{{class.subject}}</td>
+              <td>{{class.studentCount}}</td>
+              <td>
+                <button class="btn btn-sm btn-info me-2" (click)="viewClass(class.id)">View</button>
+                <button class="btn btn-sm btn-secondary" (click)="editClass(class.id)">Edit</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Grade Entry Tab Content -->
+  <div *ngIf="activeTab === 'grades'" class="card">
+    <div class="card-header">
+      <h4>Grade Entry</h4>
+    </div>
+    <div class="card-body">
+      <div class="mb-4">
+        <label for="classSelect" class="form-label">Select Class</label>
+        <select id="classSelect" class="form-select" [(ngModel)]="selectedClassId" (change)="loadStudents()">
+          <option value="">-- Select a class --</option>
+          <option *ngFor="let class of classes" [value]="class.id">{{class.name}} ({{class.subject}})</option>
+        </select>
+      </div>
+      
+      <div *ngIf="selectedClassId">
+        <div class="mb-3">
+          <label for="assignmentType" class="form-label">Assignment Type</label>
+          <select id="assignmentType" class="form-select" [(ngModel)]="newAssignment.type">
+            <option value="Quiz">Quiz</option>
+            <option value="Exam">Exam</option>
+            <option value="Homework">Homework</option>
+            <option value="Project">Project</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label for="assignmentTitle" class="form-label">Assignment Title</label>
+          <input type="text" id="assignmentTitle" class="form-control" [(ngModel)]="newAssignment.title">
+        </div>
+        
+        <div class="mb-3">
+          <label for="assignmentDate" class="form-label">Date</label>
+          <input type="date" id="assignmentDate" class="form-control" [(ngModel)]="newAssignment.date">
+        </div>
+        
+        <div class="mb-3">
+          <label for="maxPoints" class="form-label">Maximum Points</label>
+          <input type="number" id="maxPoints" class="form-control" [(ngModel)]="newAssignment.maxPoints">
+        </div>
+        
+        <div class="mb-4">
+          <button class="btn btn-primary" (click)="createAssignment()">Create Assignment</button>
+        </div>
+        
+        <div *ngIf="assignments.length > 0" class="mb-4">
+          <h5>Existing Assignments</h5>
+          <select class="form-select mb-3" [(ngModel)]="selectedAssignmentId" (change)="loadGrades()">
+            <option value="">-- Select an assignment --</option>
+            <option *ngFor="let assignment of assignments" [value]="assignment.id">
+              {{assignment.title}} ({{assignment.type}}) - {{assignment.date | date}}
+            </option>
+          </select>
+        </div>
+        
+        <div *ngIf="selectedAssignmentId && students.length > 0" class="table-responsive">
+          <h5>Enter Grades</h5>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Grade (out of {{selectedAssignment?.maxPoints}})</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of students; let i = index">
+                <td>{{student.firstName}} {{student.lastName}}</td>
+                <td>
+                  <input type="number" class="form-control" [(ngModel)]="grades[i].score" 
+                    [min]="0" [max]="selectedAssignment?.maxPoints">
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-success" (click)="saveGrade(student.id, i)">Save</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary" (click)="saveAllGrades()">Save All Grades</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Reports Tab Content -->
+  <div *ngIf="activeTab === 'reports'" class="card">
+    <div class="card-header">
+      <h4>Reports</h4>
+    </div>
+    <div class="card-body">
+      <p>Generate and view reports for your classes.</p>
+      <!-- Future report content will go here -->
+      <div class="alert alert-info">
+        Report functionality is coming soon!
+      </div>
+    </div>
+  </div>
+</div>
 
-      <div class="mt-4">
-        <p>These features are currently under development and will be available soon.</p>
+<!-- Create Class Modal -->
+<div class="modal fade" id="createClassModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create New Class</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="classForm">
+          <div class="mb-3">
+            <label for="className" class="form-label">Class Name</label>
+            <input type="text" class="form-control" id="className" formControlName="name">
+            <div *ngIf="classForm.get('name')?.errors?.['required'] && classForm.get('name')?.touched" class="text-danger">
+              Class name is required
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="subject" class="form-label">Subject</label>
+            <input type="text" class="form-control" id="subject" formControlName="subject">
+            <div *ngIf="classForm.get('subject')?.errors?.['required'] && classForm.get('subject')?.touched" class="text-danger">
+              Subject is required
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="classForm.invalid" (click)="createClass()">Create</button>
       </div>
     </div>
   </div>
