@@ -1,27 +1,46 @@
-<div class="container mt-4">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h2>Teacher Dashboard</h2>
-      <button class="btn btn-danger" (click)="logout()">Logout</button>
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="display-4">Welcome, {{ teacherName }}</h1>
+      <p class="lead">Select an option below to manage your classes, grades, or students.</p>
     </div>
-    <div class="card-body">
-      <h3>Welcome, {{teacherName}}!</h3>
-      <p class="lead">This is your teacher dashboard.</p>
+  </div>
 
-      <div class="alert alert-info mt-4">
-        <strong>Teacher Dashboard Features</strong>
-        <p>From here, you'll be able to:</p>
-        <ul>
-          <li>Create and manage classes</li>
-          <li>Add and view students in your classes</li>
-          <li>Assign and update grades</li>
-          <li>Generate reports</li>
-        </ul>
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">Class Management</h5>
+          <p class="card-text">Create, view, and manage your classes. Add or remove students from your classes.</p>
+          <button (click)="navigateToClassManagement()" class="btn btn-primary mt-auto">Manage Classes</button>
+        </div>
       </div>
+    </div>
 
-      <div class="mt-4">
-        <p>These features are currently under development and will be available soon.</p>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">Grade Management</h5>
+          <p class="card-text">Assign and view grades for students in your classes.</p>
+          <button (click)="navigateToGradeManagement()" class="btn btn-primary mt-auto">Manage Grades</button>
+        </div>
       </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">Student Management</h5>
+          <p class="card-text">View and manage student information.</p>
+          <button (click)="navigateToStudentManagement()" class="btn btn-primary mt-auto">Manage Students</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12 text-end">
+      <button (click)="logout()" class="btn btn-outline-danger">Logout</button>
     </div>
   </div>
 </div>

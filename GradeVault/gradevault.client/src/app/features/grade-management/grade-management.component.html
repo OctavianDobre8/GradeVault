@@ -1,0 +1,120 @@
+<div class="container mt-4">
+    <h2>Grade Management</h2>
+    
+    <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+    
+    <div class="card mb-4">
+      <div class="card-header">
+        <h3>Select a Class</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="isLoading" class="text-center">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        
+        <div *ngIf="!isLoading && classes.length === 0" class="alert alert-info">
+          You don't have any classes yet. Please create a class first.
+        </div>
+        
+        <div *ngIf="!isLoading && classes.length > 0" class="row row-cols-1 row-cols-md-3 g-4">
+          <div *ngFor="let class of classes" class="col">
+            <div class="card h-100" [class.border-primary]="selectedClassId === class.id" style="cursor: pointer;" (click)="loadStudentsByClass(class.id)">
+              <div class="card-body">
+                <h5 class="card-title">{{ class.name }}</h5>
+                <p class="card-text">{{ class.description }}</p>
+                <p class="card-text"><small class="text-muted">Room: {{ class.roomNumber }}</small></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="selectedClassId" class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>{{ isEditing ? 'Update Grade' : 'Add Grade' }}</h3>
+        <div>
+          <label for="bulkUpload" class="btn btn-secondary">
+            Bulk Upload
+          </label>
+          <input type="file" id="bulkUpload" class="d-none" accept=".csv,.xlsx" (change)="uploadBulkGrades($event)">
+        </div>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="gradeForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="studentId" class="form-label">Student</label>
+            <select class="form-select" id="studentId" formControlName="studentId">
+              <option value="">Select a student</option>
+              <option *ngFor="let student of students" [value]="student.id">
+                {{ student.firstName }} {{ student.lastName }}
+              </option>
+            </select>
+            <div *ngIf="gradeForm.get('studentId')?.invalid && gradeForm.get('studentId')?.touched" class="text-danger">
+              Student is required
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="value" class="form-label">Grade (1-10)</label>
+            <input type="number" class="form-control" id="value" formControlName="value" min="1" max="10">
+            <div *ngIf="gradeForm.get('value')?.invalid && gradeForm.get('value')?.touched" class="text-danger">
+              Grade must be between 1 and 10
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="gradeForm.invalid">
+              {{ isEditing ? 'Update Grade' : 'Add Grade' }}
+            </button>
+            <button *ngIf="isEditing" type="button" class="btn btn-secondary" (click)="resetForm()">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div *ngIf="selectedClassId" class="card">
+      <div class="card-header">
+        <h3>Grades</h3>
+      </div>
+      <div class="card-body">
+        <div *ngIf="isLoading" class="text-center">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        
+        <div *ngIf="!isLoading && grades.length === 0" class="alert alert-info">
+          No grades found for this class yet. Add grades using the form above.
+        </div>
+        
+        <table *ngIf="!isLoading && grades.length > 0" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Grade</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let grade of grades">
+              <td>{{ grade.studentName }}</td>
+              <td>{{ grade.value }}</td>
+              <td>{{ grade.dateAssigned | date:'medium' }}</td>
+              <td>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-primary" (click)="editGrade(grade)">Edit</button>
+                  <button class="btn btn-sm btn-danger" (click)="deleteGrade(grade.id)">Delete</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>

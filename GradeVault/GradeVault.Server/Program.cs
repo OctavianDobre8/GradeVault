@@ -94,10 +94,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy",
         builder => builder
-            .WithOrigins("https://localhost:59603")
+            .WithOrigins("https://localhost:59603", "https://127.0.0.1:59603")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
             .AllowCredentials()
-            .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .WithHeaders("Accept", "Content-Type", "Authorization", "X-Requested-With")
             .WithExposedHeaders("X-Pagination"));
 });
 

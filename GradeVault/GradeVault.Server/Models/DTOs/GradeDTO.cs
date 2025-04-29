@@ -3,8 +3,11 @@ namespace GradeVault.Server.Models.DTOs
     public class GradeDTO
     {
         public int Id { get; set; }
-        public string? ClassName { get; set; } 
-        public int Value { get; set; }         
-        public DateTime DateAssigned { get; set; } 
+        public int StudentId { get; set; }
+        public string? StudentName { get; set; }
+        public int ClassId { get; set; }
+        public string? ClassName { get; set; }
+        public int Value { get; set; }
+        public DateTime DateAssigned { get; set; }
     }
 }
