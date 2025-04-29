@@ -1,18 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { TeacherDashboardComponent } from './teacher-dashboard.component';
-
-const routes: Routes = [
-  { path: '', component: TeacherDashboardComponent }
-];
+import { TeacherDashboardRoutingModule } from './teacher-dashboard-routing.module';
 
 @NgModule({
-  declarations: [],
   imports: [
     CommonModule,
-    RouterModule.forChild(routes),
-    TeacherDashboardComponent
+    RouterModule,
+    TeacherDashboardRoutingModule,
+    TeacherDashboardComponent // Import the standalone component here
   ]
 })
 export class TeacherDashboardModule { }
