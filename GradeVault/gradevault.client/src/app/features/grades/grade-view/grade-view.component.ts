@@ -3,6 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { Grade } from '../../../shared/models/grade.model';
 import { GradesService } from '../../../core/services/grades.service';
 
+/**
+ * @brief Component for displaying a student's overall grades
+ * 
+ * This component shows all grades a student has received across all classes,
+ * providing a comprehensive view of their academic performance.
+ */
 @Component({
   selector: 'app-grade-view',
   standalone: true,
@@ -11,15 +17,42 @@ import { GradesService } from '../../../core/services/grades.service';
   styleUrl: './grade-view.component.css',
 })
 export class GradeViewComponent implements OnInit {
+  /**
+   * @brief Collection of all the student's grades
+   */
   grades: Grade[] = [];
+  
+  /**
+   * @brief Flag indicating whether data is being loaded
+   */
   isLoading: boolean = false;
+  
+  /**
+   * @brief Error message to display when operations fail
+   */
   error: string | null = null;
+  
+  /**
+   * @brief Constructor for the grade view component
+   * 
+   * @param gradesService Service for fetching grade data
+   */
   constructor(private gradesService: GradesService) {}
 
+  /**
+   * @brief Lifecycle hook that runs when the component initializes
+   * 
+   * Fetches all grades for the current student
+   */
   ngOnInit(): void {
     this.fetchGrades();
   }
 
+  /**
+   * @brief Fetches all grades for the current student
+   * 
+   * Retrieves all grades across all classes from the API
+   */
   fetchGrades(): void {
     this.isLoading = true;
     this.error = null;

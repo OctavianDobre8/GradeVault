@@ -10,6 +10,14 @@ using CsvHelper;
 
 namespace GradeVault.Server.Controllers
 {
+    /// <summary>
+    /// Controller for managing grade-related operations in GradeVault.
+    /// </summary>
+    /// <remarks>
+    /// This controller provides endpoints for both students and teachers to interact with grades,
+    /// including viewing grades, creating new grades, updating existing grades, and bulk importing
+    /// grade data. Access to functionality is appropriately limited based on user roles.
+    /// </remarks>
     [Route("api/[controller]")]
     [ApiController]
     public class GradesController : ApiControllerBase
@@ -17,6 +25,11 @@ namespace GradeVault.Server.Controllers
         private readonly AppDatabaseContext _context;
         private readonly UserManager<User> _userManager;
 
+        /// <summary>
+        /// Initializes a new instance of the GradesController.
+        /// </summary>
+        /// <param name="context">Database context for data access operations.</param>
+        /// <param name="userManager">ASP.NET Core Identity user manager for user operations.</param>
         public GradesController(AppDatabaseContext context, UserManager<User> userManager)
         {
             _context = context;
@@ -25,6 +38,18 @@ namespace GradeVault.Server.Controllers
 
         #region Student Features
         
+        /// <summary>
+        /// Retrieves all grades for the currently authenticated student.
+        /// </summary>
+        /// <returns>Collection of grades for the student across all classes.</returns>
+        /// <remarks>
+        /// This endpoint retrieves all grades assigned to the authenticated student
+        /// across all classes they are enrolled in, ordered by most recent first.
+        /// </remarks>
+        /// <response code="200">Returns the list of grades.</response>
+        /// <response code="401">If the user is not authenticated or not authorized.</response>
+        /// <response code="404">If no student profile is found for the authenticated user.</response>
+        /// <response code="500">If a server error occurs while retrieving the data.</response>
         [HttpGet("my-grades")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult<IEnumerable<GradeDTO>>> GetMyGrades()
@@ -67,6 +92,18 @@ namespace GradeVault.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves all classes the currently authenticated student is enrolled in.
+        /// </summary>
+        /// <returns>Collection of classes the student is enrolled in.</returns>
+        /// <remarks>
+        /// This endpoint returns all classes where the authenticated student has an active
+        /// enrollment record, including teacher information for each class.
+        /// </remarks>
+        /// <response code="200">Returns the list of enrolled classes.</response>
+        /// <response code="401">If the user is not authenticated or not authorized.</response>
+        /// <response code="404">If no student profile is found for the authenticated user.</response>
+        /// <response code="500">If a server error occurs while retrieving the data.</response>
         [HttpGet("my-classes")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult<IEnumerable<ClassDTO>>> GetMyClasses()
@@ -109,115 +146,154 @@ namespace GradeVault.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves all grades for the authenticated student in a specific class.
+        /// </summary>
+        /// <param name="classId">ID of the class to get grades from.</param>
+        /// <returns>Collection of student grades for the specified class.</returns>
+        /// <remarks>
+        /// This endpoint verifies that the student is enrolled in the specified class
+        /// before returning their grades for that class.
+        /// </remarks>
+        /// <response code="200">Returns the list of grades for the specific class.</response>
+        /// <response code="401">If the user is not authenticated.</response>
+        /// <response code="403">If the student is not enrolled in the specified class.</response>
+        /// <response code="404">If no student profile is found for the authenticated user.</response>
+        /// <response code="500">If a server error occurs while retrieving the data.</response>
         [HttpGet("class/{classId}/student")]
-[Authorize(Roles = "Student")]
-public async Task<ActionResult<IEnumerable<GradeDTO>>> GetGradesByClassForStudent(int classId)
-{
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    if (string.IsNullOrEmpty(userId))
-    {
-        return Unauthorized();
-    }
-
-    try
-    {
-        var student = await _context.Students
-            .FirstOrDefaultAsync(s => s.UserId == userId);
-
-        if (student == null)
+        [Authorize(Roles = "Student")]
+        public async Task<ActionResult<IEnumerable<GradeDTO>>> GetGradesByClassForStudent(int classId)
         {
-            return NotFound("No student profile found for this user.");
-        }
-
-        // Verify the student is enrolled in this class
-        var isEnrolled = await _context.ClassEnrollments
-            .AnyAsync(e => e.ClassId == classId && e.StudentId == student.Id);
-
-        if (!isEnrolled)
-        {
-            return Forbid(); // Student is not enrolled in this class
-        }
-
-        var grades = await _context.Grades
-            .Where(g => g.StudentId == student.Id && g.ClassId == classId)
-            .Include(g => g.Class)
-            .Select(g => new GradeDTO
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
             {
-                Id = g.Id,
-                ClassName = g.Class.Name,
-                Value = g.Value,
-                DateAssigned = g.DateAssigned,
-                StudentId = g.StudentId
-            })
-            .ToListAsync();
+                return Unauthorized();
+            }
 
-        return Ok(grades);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"An error occurred while retrieving grades: {ex.Message}");
-    }
-}
+            try
+            {
+                var student = await _context.Students
+                    .FirstOrDefaultAsync(s => s.UserId == userId);
 
+                if (student == null)
+                {
+                    return NotFound("No student profile found for this user.");
+                }
+
+                // Verify the student is enrolled in this class
+                var isEnrolled = await _context.ClassEnrollments
+                    .AnyAsync(e => e.ClassId == classId && e.StudentId == student.Id);
+
+                if (!isEnrolled)
+                {
+                    return Forbid(); // Student is not enrolled in this class
+                }
+
+                var grades = await _context.Grades
+                    .Where(g => g.StudentId == student.Id && g.ClassId == classId)
+                    .Include(g => g.Class)
+                    .Select(g => new GradeDTO
+                    {
+                        Id = g.Id,
+                        ClassName = g.Class.Name,
+                        Value = g.Value,
+                        DateAssigned = g.DateAssigned,
+                        StudentId = g.StudentId
+                    })
+                    .ToListAsync();
+
+                return Ok(grades);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving grades: {ex.Message}");
+            }
+        }
         
         #endregion
 
         #region Teacher Features
         
-       [HttpGet("class/{classId}/teacher")]
-[Authorize(Roles = "Teacher")]
-public async Task<ActionResult<IEnumerable<GradeDTO>>> GetGradesByClassForTeacher(int classId)
-{
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    if (string.IsNullOrEmpty(userId))
-    {
-        return Unauthorized();
-    }
-
-    try
-    {
-        var teacher = await _context.Teachers
-            .FirstOrDefaultAsync(t => t.UserId == userId);
-
-        if (teacher == null)
+        /// <summary>
+        /// Retrieves all grades for all students in a specific class.
+        /// </summary>
+        /// <param name="classId">ID of the class to get grades from.</param>
+        /// <returns>Collection of all grades in the specified class.</returns>
+        /// <remarks>
+        /// This endpoint verifies that the authenticated teacher is the owner of the specified class
+        /// before returning all grades assigned within that class.
+        /// </remarks>
+        /// <response code="200">Returns the list of all grades for the class.</response>
+        /// <response code="401">If the user is not authenticated or not authorized.</response>
+        /// <response code="404">If no teacher profile is found, or the class is not found, or the teacher does not own the class.</response>
+        /// <response code="500">If a server error occurs while retrieving the data.</response>
+        [HttpGet("class/{classId}/teacher")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<IEnumerable<GradeDTO>>> GetGradesByClassForTeacher(int classId)
         {
-            return NotFound("No teacher profile found for this user.");
-        }
-
-        // Verify the class belongs to this teacher
-        var classExists = await _context.Classes
-            .AnyAsync(c => c.Id == classId && c.TeacherId == teacher.Id);
-
-        if (!classExists)
-        {
-            return NotFound("Class not found or you don't have permission to access it.");
-        }
-
-        var grades = await _context.Grades
-            .Where(g => g.ClassId == classId)
-            .Include(g => g.Student)
-            .Include(g => g.Class)
-            .Select(g => new GradeDTO
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
             {
-                Id = g.Id,
-                StudentId = g.StudentId,
-                StudentName = g.Student.FirstName + " " + g.Student.LastName,
-                ClassId = g.ClassId,
-                ClassName = g.Class.Name,
-                Value = g.Value,
-                DateAssigned = g.DateAssigned
-            })
-            .OrderByDescending(g => g.DateAssigned)
-            .ToListAsync();
+                return Unauthorized();
+            }
 
-        return Ok(grades);
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"An error occurred while retrieving grades: {ex.Message}");
-    }
-}
+            try
+            {
+                var teacher = await _context.Teachers
+                    .FirstOrDefaultAsync(t => t.UserId == userId);
 
+                if (teacher == null)
+                {
+                    return NotFound("No teacher profile found for this user.");
+                }
+
+                // Verify the class belongs to this teacher
+                var classExists = await _context.Classes
+                    .AnyAsync(c => c.Id == classId && c.TeacherId == teacher.Id);
+
+                if (!classExists)
+                {
+                    return NotFound("Class not found or you don't have permission to access it.");
+                }
+
+                var grades = await _context.Grades
+                    .Where(g => g.ClassId == classId)
+                    .Include(g => g.Student)
+                    .Include(g => g.Class)
+                    .Select(g => new GradeDTO
+                    {
+                        Id = g.Id,
+                        StudentId = g.StudentId,
+                        StudentName = g.Student.FirstName + " " + g.Student.LastName,
+                        ClassId = g.ClassId,
+                        ClassName = g.Class.Name,
+                        Value = g.Value,
+                        DateAssigned = g.DateAssigned
+                    })
+                    .OrderByDescending(g => g.DateAssigned)
+                    .ToListAsync();
+
+                return Ok(grades);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving grades: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Creates a new grade for a student in a class.
+        /// </summary>
+        /// <param name="model">Grade creation data transfer object.</param>
+        /// <returns>Newly created grade details.</returns>
+        /// <remarks>
+        /// This endpoint allows teachers to assign a new grade to a student in one of their classes.
+        /// It validates that the class belongs to the teacher and that the student is enrolled in the class.
+        /// </remarks>
+        /// <response code="201">Returns the newly created grade.</response>
+        /// <response code="400">If the student is not enrolled in the class.</response>
+        /// <response code="401">If the user is not authenticated or not authorized.</response>
+        /// <response code="404">If no teacher profile is found, or the class is not found, or the teacher does not own the class.</response>
         [HttpPost]
         [Authorize(Roles = "Teacher")]
         public async Task<ActionResult<GradeDTO>> CreateGrade(CreateGradeDTO model)
@@ -276,6 +352,20 @@ public async Task<ActionResult<IEnumerable<GradeDTO>>> GetGradesByClassForTeache
             });
         }
 
+        /// <summary>
+        /// Updates an existing grade's value.
+        /// </summary>
+        /// <param name="id">ID of the grade to update.</param>
+        /// <param name="model">Grade update data transfer object.</param>
+        /// <returns>No content on successful update.</returns>
+        /// <remarks>
+        /// This endpoint allows teachers to modify the value of an existing grade.
+        /// It verifies that the grade belongs to a class owned by the authenticated teacher.
+        /// </remarks>
+        /// <response code="204">If the grade was successfully updated.</response>
+        /// <response code="401">If the user is not authenticated or not authorized.</response>
+        /// <response code="403">If the teacher does not own the class the grade belongs to.</response>
+        /// <response code="404">If no teacher profile is found or the grade is not found.</response>
         [HttpPut("{id}")]
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> UpdateGrade(int id, UpdateGradeDTO model)
@@ -312,6 +402,19 @@ public async Task<ActionResult<IEnumerable<GradeDTO>>> GetGradesByClassForTeache
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes an existing grade.
+        /// </summary>
+        /// <param name="id">ID of the grade to delete.</param>
+        /// <returns>No content on successful deletion.</returns>
+        /// <remarks>
+        /// This endpoint allows teachers to delete an existing grade.
+        /// It verifies that the grade belongs to a class owned by the authenticated teacher.
+        /// </remarks>
+        /// <response code="204">If the grade was successfully deleted.</response>
+        /// <response code="401">If the user is not authenticated or not authorized.</response>
+        /// <response code="403">If the teacher does not own the class the grade belongs to.</response>
+        /// <response code="404">If no teacher profile is found or the grade is not found.</response>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> DeleteGrade(int id)
@@ -347,6 +450,23 @@ public async Task<ActionResult<IEnumerable<GradeDTO>>> GetGradesByClassForTeache
             return NoContent();
         }
 
+        /// <summary>
+        /// Imports multiple grades from a CSV file.
+        /// </summary>
+        /// <param name="classId">ID of the class to assign grades to.</param>
+        /// <param name="file">CSV file containing grade data.</param>
+        /// <returns>Status message and count of imported grades.</returns>
+        /// <remarks>
+        /// This endpoint allows teachers to bulk upload grades from a CSV file.
+        /// The CSV file should contain studentId and value columns.
+        /// It performs validation on each record, ensuring students exist, are enrolled,
+        /// and that grade values are valid (between 1 and 10).
+        /// </remarks>
+        /// <response code="200">Returns success message with count of imported grades.</response>
+        /// <response code="400">If the file is missing/empty or contains validation errors.</response>
+        /// <response code="401">If the user is not authenticated or not authorized.</response>
+        /// <response code="404">If no teacher profile is found, or the class is not found, or the teacher does not own the class.</response>
+        /// <response code="500">If a server error occurs during file processing or database operations.</response>
         [HttpPost("bulk-upload")]
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> BulkUploadGrades([FromForm] int classId, [FromForm] IFormFile file)

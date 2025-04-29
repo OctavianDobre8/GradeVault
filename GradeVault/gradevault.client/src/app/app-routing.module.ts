@@ -3,6 +3,16 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { ResetPasswordComponent } from './features/auth/components/reset-password/reset-password.component';
 
+/**
+ * @brief Application routes configuration
+ * 
+ * Defines the main routing structure for the application, including:
+ * - Authentication routes (login, register, password recovery)
+ * - Teacher-specific routes protected by AuthGuard with Teacher role
+ * - Student-specific routes protected by AuthGuard with Student role
+ * - Public routes like password reset
+ * - Default route redirecting to registration
+ */
 const routes: Routes = [
   {
     path: 'auth',
@@ -52,6 +62,12 @@ const routes: Routes = [
   },
 ];
 
+/**
+ * @brief Root routing module for the application
+ * 
+ * Configures the router with the application's routes and makes
+ * the router directives and services available throughout the app.
+ */
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],

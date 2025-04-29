@@ -4,6 +4,12 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
+/**
+ * @brief Component for user registration
+ * 
+ * This component provides a form for new users to create an account
+ * with validation for all required fields and appropriate error handling.
+ */
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -12,16 +18,53 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class RegisterComponent implements OnInit {
+  /**
+   * @brief Form group for the registration form
+   */
   registerForm: FormGroup;
+  
+  /**
+   * @brief Flag indicating whether a request is in progress
+   */
   loading = false;
+  
+  /**
+   * @brief Flag indicating whether the form has been submitted
+   */
   submitted = false;
+  
+  /**
+   * @brief Main error message to display when request fails
+   */
   error = '';
+  
+  /**
+   * @brief Array of validation error messages from the server
+   */
   errors: string[] = [];  // Array to hold multiple error messages
+  
+  /**
+   * @brief Success message to display when registration succeeds
+   */
   success = '';
 
-  // Password validation pattern
+  /**
+   * @brief Regular expression for password validation
+   * 
+   * Ensures password has minimum 8 characters, with at least one 
+   * uppercase letter, one lowercase letter, one number, and one special character.
+   */
   passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+  /**
+   * @brief Constructor for the registration component
+   * 
+   * Initializes the form with validation for all required fields
+   * 
+   * @param formBuilder Angular form builder service
+   * @param router Angular router for navigation
+   * @param authService Authentication service for user registration
+   */
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
@@ -43,10 +86,18 @@ export class RegisterComponent implements OnInit {
     });
   }
 
+  /**
+   * @brief Lifecycle hook that runs when the component initializes
+   */
   ngOnInit(): void {
   }
 
-  // Custom validator to check that password and confirm password match
+  /**
+   * @brief Custom validator to check that password and confirm password match
+   * 
+   * @param formGroup The form group containing password fields
+   * @returns null if valid, error object if passwords don't match
+   */
   passwordMatchValidator(formGroup: FormGroup) {
     const password = formGroup.get('password')?.value;
     const confirmPassword = formGroup.get('confirmPassword')?.value;
@@ -59,9 +110,19 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  // Convenience getter for easy access to form fields
+  /**
+   * @brief Convenience getter for easy access to form fields
+   * 
+   * @returns The form controls
+   */
   get f() { return this.registerForm.controls; }
 
+  /**
+   * @brief Handles form submission for user registration
+   * 
+   * Validates the form and calls the auth service to register a new user
+   * with the provided information.
+   */
   onSubmit(): void {
     this.submitted = true;
     this.error = '';
@@ -128,4 +189,3 @@ export class RegisterComponent implements OnInit {
     });
   }
 }
-

@@ -1,0 +1,32 @@
+PROJECT_NAME           = "GradeVault"
+PROJECT_BRIEF          = "A grade management system for schools"
+OUTPUT_DIRECTORY       = ./docs
+INPUT                  = ./gradevault.client/src
+FILE_PATTERNS          = *.ts
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_PACKAGE        = YES
+EXTRACT_STATIC         = YES
+
+# For TypeScript
+EXTENSION_MAPPING      = ts=JavaScript
+OPTIMIZE_OUTPUT_JAVA   = YES
+JAVADOC_AUTOBRIEF      = YES
+
+# Handle Angular decorators properly
+ALIASES                = "brief=\brief" \
+                         "Component=\class" \
+                         "Injectable=\class"
+
+# Recommended settings
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HTML_OUTPUT            = html
+HAVE_DOT               = doxygen DoxyfileNO
+UML_LOOK               = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+TEMPLATE_RELATIONS     = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES

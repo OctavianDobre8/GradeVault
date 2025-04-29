@@ -6,6 +6,14 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { NoAuthGuard } from '../../core/guards/no-auth.guard';
 
+/**
+ * @brief Routes configuration for authentication feature
+ * 
+ * Defines all routes related to authentication functionality including
+ * login, registration, password recovery, and password reset pages.
+ * All routes are protected by the NoAuthGuard to prevent authenticated
+ * users from accessing these pages.
+ */
 const routes: Routes = [
   {
     path: '',
@@ -20,6 +28,13 @@ const routes: Routes = [
   }
 ];
 
+/**
+ * @brief Routing module for authentication features
+ * 
+ * This module configures and provides routes for auth-related pages,
+ * using the NoAuthGuard to prevent authenticated users from accessing
+ * pages they don't need when already logged in.
+ */
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]

@@ -4,6 +4,12 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
+/**
+ * @brief Component for handling password recovery requests
+ * 
+ * This component provides a form for users to submit their email address
+ * to begin the password recovery process.
+ */
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.component.html',
@@ -12,12 +18,40 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class ForgotPasswordComponent {
+  /**
+   * @brief Form group for the password recovery form
+   */
   forgotPasswordForm: FormGroup;
+  
+  /**
+   * @brief Flag indicating whether a request is in progress
+   */
   loading = false;
+  
+  /**
+   * @brief Flag indicating whether the form has been submitted
+   */
   submitted = false;
+  
+  /**
+   * @brief Error message to display when request fails
+   */
   errorMessage = '';
+  
+  /**
+   * @brief Success message to display when request succeeds
+   */
   successMessage = '';
 
+  /**
+   * @brief Constructor for the forgot password component
+   * 
+   * Initializes the form with validation for the email field
+   * 
+   * @param formBuilder Angular form builder service
+   * @param router Angular router for navigation
+   * @param authService Authentication service for password recovery
+   */
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
@@ -28,9 +62,19 @@ export class ForgotPasswordComponent {
     });
   }
 
-  // Convenience getter for easy access to form fields
+  /**
+   * @brief Convenience getter for easy access to form fields
+   * 
+   * @returns The form controls
+   */
   get f() { return this.forgotPasswordForm.controls; }
 
+  /**
+   * @brief Handles form submission for password recovery
+   * 
+   * Validates the form and calls the auth service to initiate
+   * the password recovery process for the provided email.
+   */
   onSubmit(): void {
     this.submitted = true;
     this.errorMessage = '';
